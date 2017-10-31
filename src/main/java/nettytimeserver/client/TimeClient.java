@@ -9,6 +9,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import nettytimeserver.utils.Const;
 
+import java.io.File;
+
 public class TimeClient {
     public void connect(int port, String host) throws Exception {
         EventLoopGroup group = new NioEventLoopGroup();
