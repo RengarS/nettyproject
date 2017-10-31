@@ -1,13 +1,13 @@
 package nettytimeserver.client;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import nettytimeserver.utils.Const;
 
 public class TimeClient {
     public void connect(int port, String host) throws Exception {
@@ -32,7 +32,27 @@ public class TimeClient {
     }
 
     public static void main(String[] args) throws Exception {
-        int port = 8080;
-        new TimeClient().connect(port, "127.0.0.1");
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    new TimeClient().connect(8888, "127.0.0.1");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        try {
+            Thread.sleep(1000);
+            while (true) {
+                System.out.println("请输入消息：");
+                String request = Const.scanner.nextLine();
+                Channel channel = TimeClientHandler.channel;
+                ByteBuf byteBuf = Unpooled.copiedBuffer(request.getBytes());
+                channel.writeAndFlush(byteBuf);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -36,7 +36,7 @@ public class TimeServer {
     }
 
     public static void main(String[] args) throws Exception {
-        int port = 8080;
+        int port = 8888;
         new TimeServer().bind(port);
     }
 }

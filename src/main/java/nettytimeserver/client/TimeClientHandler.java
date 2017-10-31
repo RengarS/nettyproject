@@ -1,22 +1,18 @@
 package nettytimeserver.client;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 
-public class TimeClientHandler extends ChannelHandlerAdapter {
-    private final ByteBuf firstMessage;
 
-    public TimeClientHandler() {
-        byte[] req = "Query Time Order".getBytes();
-        firstMessage = Unpooled.buffer(req.length);
-        firstMessage.writeBytes(req);
-    }
+public class TimeClientHandler extends ChannelHandlerAdapter {
+    public static Channel channel = null;
 
     @Override
     public void channelActive(ChannelHandlerContext context) {
-        context.writeAndFlush(firstMessage);
+        this.channel = context.channel();
+        context.writeAndFlush("朋友已经上线！");
     }
 
     @Override
@@ -25,7 +21,7 @@ public class TimeClientHandler extends ChannelHandlerAdapter {
         byte[] req = new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(req);
         String body = new String(req, "UTF-8");
-        System.out.println("Now is :" + body);
+        System.out.println("对方发送的消息是：" + body);
     }
 
     public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
