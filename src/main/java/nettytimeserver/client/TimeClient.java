@@ -7,11 +7,19 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import nettytimeserver.domain.Request;
 import nettytimeserver.utils.Const;
+import nettytimeserver.utils.SerializableUtils;
 
-import java.io.File;
+import java.util.Date;
 
+/**
+ * @author Aries
+ */
 public class TimeClient {
+
+    private static Channel channel = null;
+
     public void connect(int port, String host) throws Exception {
         EventLoopGroup group = new NioEventLoopGroup();
 
@@ -27,6 +35,7 @@ public class TimeClient {
                         }
                     });
             ChannelFuture future = bootstrap.connect(host, port).sync();
+            channel = future.channel();
             future.channel().closeFuture().sync();
         } finally {
             group.shutdownGracefully();
@@ -34,23 +43,38 @@ public class TimeClient {
     }
 
     public static void main(String[] args) throws Exception {
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    new TimeClient().connect(8888, "127.0.0.1");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        new Thread(() -> {
+            try {
+                new TimeClient().connect(8888, "127.0.0.1");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }).start();
 
+
         try {
-            Thread.sleep(1000);
+            Request request = new Request();
+            Thread.sleep(10000);
+
             while (true) {
                 System.out.println("请输入消息：");
-                String request = Const.scanner.nextLine();
-                Channel channel = TimeClientHandler.channel;
-                ByteBuf byteBuf = Unpooled.copiedBuffer(request.getBytes());
+                String msg = Const.scanner.nextLine();
+                //退出
+                if ("quit".equals(msg)) {
+                    request.setAction(Const.REQUEST_LOGOUT);
+                    request.setSender(TimeClientHandler.send);
+                    TimeClient.channel.writeAndFlush(Unpooled.copiedBuffer(SerializableUtils
+                            .SerializableObject(request, Request.class)));
+                    TimeClient.channel.close();
+                    break;
+                }
+                //发送消息
+                Channel channel = TimeClient.channel;
+                request.setAction(Const.REQUEST_SEND);
+                request.setSender(TimeClientHandler.send);
+                request.setTime(Const.FORMAT.format(new Date()));
+                request.setContent(msg);
+                ByteBuf byteBuf = Unpooled.copiedBuffer(SerializableUtils.SerializableObject(request, Request.class));
                 channel.writeAndFlush(byteBuf);
             }
         } catch (Exception e) {

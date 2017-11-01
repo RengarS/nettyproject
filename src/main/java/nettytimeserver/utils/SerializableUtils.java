@@ -6,6 +6,9 @@ import com.dyuproject.protostuff.runtime.RuntimeSchema;
 import nettytimeserver.domain.Request;
 import nettytimeserver.domain.Response;
 
+/**
+ * @author aries
+ */
 public class SerializableUtils {
     private static final RuntimeSchema<Request> REQUEST_RUNTIME_SCHEMA = RuntimeSchema.createFrom(Request.class);
     private static final RuntimeSchema<Response> RESPONSE_RUNTIME_SCHEMA = RuntimeSchema.createFrom(Response.class);

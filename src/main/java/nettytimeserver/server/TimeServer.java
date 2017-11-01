@@ -8,7 +8,11 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import nettytimeserver.utils.Const;
 
+/**
+ * @author aries
+ */
 public class TimeServer {
     public void bind(int port) throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -21,6 +25,7 @@ public class TimeServer {
                     .option(ChannelOption.SO_BACKLOG, 1024)
                     .childHandler(new ChildChannelHandler());
             ChannelFuture future = bootstrap.bind(port).sync();
+            Const.serverChannel = future.channel();
             future.channel().closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();

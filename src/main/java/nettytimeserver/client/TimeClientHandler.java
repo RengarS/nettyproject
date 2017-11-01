@@ -1,18 +1,29 @@
 package nettytimeserver.client;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import nettytimeserver.domain.Request;
+import nettytimeserver.domain.Response;
+import nettytimeserver.utils.Const;
+import nettytimeserver.utils.SerializableUtils;
 
-
+/**
+ * @author Aries
+ */
 public class TimeClientHandler extends ChannelHandlerAdapter {
-    public static Channel channel = null;
+    public static String send = "";
 
     @Override
-    public void channelActive(ChannelHandlerContext context) {
-        this.channel = context.channel();
-        context.writeAndFlush("朋友已经上线！");
+    public void channelActive(ChannelHandlerContext context) throws Exception {
+        Request request = new Request();
+        request.setAction(Const.REQUEST_LOGIN);
+        System.out.print("请输入你的id:");
+        String msg = Const.scanner.nextLine();
+        send = msg;
+        request.setSender(msg);
+        context.writeAndFlush(Unpooled.copiedBuffer(SerializableUtils.SerializableObject(request, Request.class)));
     }
 
     @Override
@@ -20,10 +31,11 @@ public class TimeClientHandler extends ChannelHandlerAdapter {
         ByteBuf byteBuf = (ByteBuf) msg;
         byte[] req = new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(req);
-        String body = new String(req, "UTF-8");
-        System.out.println("对方发送的消息是：" + body);
+        Response response = SerializableUtils.UnSerializableObject(req, Response.class);
+        System.out.println(response.getTime() + ":" + response.getSender() + "->" + response.getContent());
     }
 
+    @Override
     public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
         context.close();
     }
