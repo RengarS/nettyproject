@@ -9,7 +9,7 @@
         <module name="nettyproject" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="1.8">
+    <bytecodeTargetLevel>
       <module name="nettyproject" target="1.5" />
     </bytecodeTargetLevel>
   </component>
